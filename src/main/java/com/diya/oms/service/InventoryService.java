@@ -1,13 +1,19 @@
 package com.diya.oms.service;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.stereotype.Service;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
+
+@Service
 public class InventoryService {
-    private Map<String, Integer> stock;
+    private final Map<String, AtomicInteger> stock;
+    private final ReentrantLock lock = new ReentrantLock();
 
     public InventoryService() {
-        this.stock = new HashMap<>();
+        this.stock = new ConcurrentHashMap<>();
     }
 
     public void addStock(String productId, int quantity) {
@@ -17,7 +23,8 @@ public class InventoryService {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Add quantity must be positive");
         }
-        stock.merge(productId,quantity, Integer::sum);
+        stock.computeIfAbsent(productId, k -> new AtomicInteger(0)).addAndGet(quantity);
+        //stock.merge(productId,quantity, Integer::sum);
         //if (stock.containsKey(productId)) {
         //    stock.put(productId, stock.get(productId) + quantity);
         //} else {
@@ -35,22 +42,25 @@ public class InventoryService {
         if (!stock.containsKey(productId)) {
             return false;
         }
-        int currentStock = stock.get(productId);
-        int newStock = currentStock - quantity;
-        if (newStock >= 0) {
-            stock.put(productId, newStock);
-            return true;
+        lock.lock();
+        try {
+            int currentStock = stock.get(productId).get();
+            int newStock = currentStock - quantity;
+            if (newStock >= 0) {
+                stock.get(productId).set(newStock);
+                return true;
+            }
+        } finally {
+            lock.unlock();
         }
         return false;
-
-
     }
 
     public int getStock(String productId) {
         if (!stock.containsKey(productId)) {
             throw new IllegalArgumentException("Product ID not found");
         }
-        return stock.get(productId);
+        return stock.get(productId).get();
     }
 
     public boolean isAvailable(String productId, int quantity) {
