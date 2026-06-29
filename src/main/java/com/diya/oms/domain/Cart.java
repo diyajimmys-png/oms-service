@@ -28,15 +28,16 @@ import java.util.Optional;
 @Component
 public class Cart {
 
-    private final String customerId;
+    private String customerId;
     private final List<CartItem> items;   // ArrayList internally
 
-    public Cart(String customerId) {
-        if (customerId == null || customerId.isBlank()) {
-            throw new IllegalArgumentException("Customer ID cannot be blank");
-        }
+    public Cart() { // no-arg constructor for Spring
+        this.customerId = "guest";
+        this.items = new ArrayList<>();
+    }
+
+    public void setCustomerId(String customerId) {
         this.customerId = customerId;
-        this.items      = new ArrayList<>();
     }
 
     /**
@@ -90,6 +91,10 @@ public class Cart {
      */
     public List<CartItem> getItems() {
         return Collections.unmodifiableList(items);
+    }
+
+    public void clearItems() {
+        items.clear(); // ✅ clears the internal list directly
     }
 
     // Internal helper — not exposed publicly

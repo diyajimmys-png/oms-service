@@ -17,14 +17,8 @@ public class CheckoutController {
     }
 
     @PostMapping
-    public ResponseEntity<?> checkout(){
-        try {
-            Order o = checkoutService.checkout();
-            return ResponseEntity.ok(o);
-        }
-        catch (IllegalStateException e)
-        {
-           return ResponseEntity.badRequest().body(e.getMessage()) ;
-        }
+    public ResponseEntity<Order> checkout() {
+        Order o = checkoutService.checkout();
+        return ResponseEntity.ok(o);
     }
 }

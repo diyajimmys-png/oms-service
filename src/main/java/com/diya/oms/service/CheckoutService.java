@@ -43,7 +43,7 @@ public class CheckoutService {
         Order order = new Order(cart.getCustomerId(), new ArrayList<>(cart.getItems()));
         paymentStrategy.pay(order.getTotalAmount());
         orderService.placeOrder(order);
-        cart.getItems().clear();
+        cart.clearItems();
         return order;
     }
 }

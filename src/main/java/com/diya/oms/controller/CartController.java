@@ -13,26 +13,21 @@ public class CartController {
     public CartController(CartService cartService) {
         this.cartService = cartService;
     }
+
     @GetMapping
-    public ResponseEntity<Cart> getCart(){
+    public ResponseEntity<Cart> getCart() {
         Cart cart = cartService.getCart();
         return ResponseEntity.ok(cart);
     }
 
     @PostMapping("/{productId}")
-    public ResponseEntity<String> addItem(@PathVariable String productId,@RequestParam int quantity){
-       try
-       {
-           cartService.addItem(productId,quantity);
-       }
-       catch(IllegalArgumentException e){
-           return ResponseEntity.badRequest().body(e.getMessage());
-       }
-       return ResponseEntity.ok(productId);
+    public ResponseEntity<String> addItem(@PathVariable String productId, @RequestParam int quantity) {
+        cartService.addItem(productId, quantity);
+        return ResponseEntity.ok("Added product"+productId +"to cart");
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<String> deleteItem(@PathVariable String productId){
+    public ResponseEntity<String> deleteItem(@PathVariable String productId) {
         cartService.removeItem(productId);
         return ResponseEntity.ok("Item Removed");
     }
