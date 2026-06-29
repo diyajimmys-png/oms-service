@@ -3,6 +3,7 @@ package com.diya.oms.service;
 import com.diya.oms.domain.Cart;
 import com.diya.oms.domain.CartItem;
 import com.diya.oms.domain.Order;
+import com.diya.oms.payment.PaymentStrategy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,10 +13,14 @@ import java.util.ArrayList;
 public class CheckoutService {
     private final Cart cart;
     private final InventoryService inventoryService;
+    private final PaymentStrategy paymentStrategy;
+    private final OrderService orderService;
 
-    public CheckoutService(Cart cart, InventoryService inventoryService) {
+    public CheckoutService(Cart cart, InventoryService inventoryService, PaymentStrategy paymentStrategy, OrderService orderService) {
         this.cart = cart;
         this.inventoryService = inventoryService;
+        this.paymentStrategy = paymentStrategy;
+        this.orderService = orderService;
     }
 
     @Transactional
@@ -36,6 +41,8 @@ public class CheckoutService {
             inventoryService.reduceStock(productId, quantity);
         }
         Order order = new Order(cart.getCustomerId(), new ArrayList<>(cart.getItems()));
+        paymentStrategy.pay(order.getTotalAmount());
+        orderService.placeOrder(order);
         cart.getItems().clear();
         return order;
     }
