@@ -76,6 +76,14 @@ Swagger UI available at: `http://localhost:8080/swagger-ui/index.html`
 
 ---
 
+## Screenshots
+
+**Swagger UI — API Endpoints**
+![Swagger UI](swagger-ui.png)
+
+**PostgreSQL — Product Table**
+![Product Table](product-table.png)
+
 ## Architecture Decisions
 
 - **UUID strings** for all IDs — safe for distributed systems, no coordination needed
