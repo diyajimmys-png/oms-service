@@ -1,35 +1,41 @@
 package com.diya.oms.service;
 
 import com.diya.oms.domain.Product;
-import com.diya.oms.domain.enums.Category;
+import com.diya.oms.dto.ProductRequest;
+import com.diya.oms.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ProductService {
-    private final List<Product> productList;
 
-    public ProductService() {
-        Product laptop = new Product("Laptop", new BigDecimal("200.00"), Category.ELECTRONICS, "15 inch");
-        Product book = new Product("Clean Code", new BigDecimal("35.00"), Category.BOOKS, "By Robert Martin");
-        Product shirt = new Product("T-Shirt", new BigDecimal("20.00"), Category.CLOTHING, "Cotton");
-        this.productList = new ArrayList<>(List.of(laptop, book, shirt));
+    private final ProductRepository productRepository;
+
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
     }
 
     public List<Product> getAllProducts() {
-        return productList;
+        return productRepository.findAll();
     }
 
     public Product getProductById(String id) {
-        return productList.stream().filter(p -> p.getId().equals(id)).findFirst().orElseThrow(() -> new RuntimeException("Product not found"));
+        return productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
-    public Product addProduct(Product p){
-        productList.add(p);
-        return p;
+    @Transactional
+    public Product addProduct(ProductRequest request) {
+        Product p = new Product(
+                UUID.randomUUID().toString(),
+                request.getName(),
+                request.getPrice(),
+                request.getCategory(),
+                request.getDescription()
+        );
+        return productRepository.save(p);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.diya.oms.controller;
 
 import com.diya.oms.domain.Product;
+import com.diya.oms.dto.ProductRequest;
 import com.diya.oms.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +38,8 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> addProduct(@RequestBody Product product){
-        Product p = productService.addProduct(product);
+    public ResponseEntity<Product> addProduct(@RequestBody ProductRequest request) {
+        Product p = productService.addProduct(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(p);
     }
 }

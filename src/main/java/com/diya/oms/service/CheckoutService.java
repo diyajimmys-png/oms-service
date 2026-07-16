@@ -3,11 +3,13 @@ package com.diya.oms.service;
 import com.diya.oms.domain.Cart;
 import com.diya.oms.domain.CartItem;
 import com.diya.oms.domain.Order;
+import com.diya.oms.domain.OrderItem;
 import com.diya.oms.payment.PaymentStrategy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class CheckoutService {
@@ -40,7 +42,15 @@ public class CheckoutService {
             int quantity = item.getQuantity();
             inventoryService.reduceStock(productId, quantity);
         }
-        Order order = new Order(cart.getCustomerId(), new ArrayList<>(cart.getItems()));
+        List<OrderItem> orderItems = cart.getItems().stream()
+                .map(item -> new OrderItem(
+                        UUID.randomUUID().toString(),
+                        item.getProduct().getId(),
+                        item.getQuantity(),
+                        item.getProduct().getPrice()
+                ))
+                .toList();
+        Order order = new Order(UUID.randomUUID().toString(), cart.getCustomerId(), orderItems);
         paymentStrategy.pay(order.getTotalAmount());
         orderService.placeOrder(order);
         cart.clearItems();
